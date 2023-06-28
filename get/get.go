@@ -10,7 +10,7 @@ import (
 	types "get-cafedra.com/m/v2/types"
 )
 
-func Departament(client *http.Client) []types.Depart {
+func Departament(client *http.Client) []types.DepartDemo {
 	resp, err := client.Get("https://oldit.isuct.ru/api/departament")
 	if err != nil {
 		fmt.Println(err)
@@ -21,7 +21,7 @@ func Departament(client *http.Client) []types.Depart {
 		if err != nil {
 			fmt.Println(err)
 		}
-		var departament []types.Depart
+		var departament []types.DepartDemo
 		err = json.Unmarshal(bodyBytes, &departament)
 		if err != nil {
 			fmt.Println(err)
@@ -58,7 +58,7 @@ func Articles(client *http.Client) types.ArticleResp {
 	}
 }
 
-func Teachers(client *http.Client) []types.Teacher {
+func Teachers(client *http.Client) []types.TeacherDemo {
 	resp, err := client.Get("https://oldit.isuct.ru/api/teacher")
 	if err != nil {
 		fmt.Println(err)
@@ -69,7 +69,7 @@ func Teachers(client *http.Client) []types.Teacher {
 		if err != nil {
 			fmt.Println(err)
 		}
-		var teachers []types.Teacher
+		var teachers []types.TeacherDemo
 		err = json.Unmarshal(bodyBytes, &teachers)
 		if err != nil {
 			fmt.Println(err)
@@ -82,7 +82,7 @@ func Teachers(client *http.Client) []types.Teacher {
 	}
 }
 
-func ImageDepartament(client *http.Client, depart []types.Depart) {
+func ImageDepartament(client *http.Client, depart []types.DepartDemo) {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -104,7 +104,9 @@ func ImageDepartament(client *http.Client, depart []types.Depart) {
 			fmt.Println(err)
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
+		if resp.StatusCode != http.StatusOK {
+			fmt.Println(resp.StatusCode)
+		} else {
 			fileName := depart[i].Id + "-" + depart[i].Title + ".jfif"
 			file, err := os.Create(fileName)
 			if err != nil {
@@ -115,8 +117,6 @@ func ImageDepartament(client *http.Client, depart []types.Depart) {
 			if err != nil {
 				fmt.Println(err)
 			}
-		} else {
-			fmt.Println(resp.StatusCode)
 		}
 	}
 	if err := os.Chdir(currentDir); err != nil {
@@ -152,7 +152,9 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 			fmt.Println(err)
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
+		if resp.StatusCode != http.StatusOK {
+			fmt.Println(fmt.Sprint(resp.StatusCode) + " " + articles.Articles[i].Id)
+		} else {
 			fileName := articles.Articles[i].Id + ".jpg"
 			file, err := os.Create(fileName)
 			if err != nil {
@@ -163,8 +165,6 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 			if err != nil {
 				fmt.Println(err)
 			}
-		} else {
-			fmt.Println(fmt.Sprint(resp.StatusCode) + " " + articles.Articles[i].Id)
 		}
 	}
 	if err := os.Chdir(currentDir); err != nil {
@@ -172,7 +172,7 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 	}
 }
 
-func ImageTeachers(client *http.Client, teachers []types.Teacher) {
+func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -194,7 +194,9 @@ func ImageTeachers(client *http.Client, teachers []types.Teacher) {
 			fmt.Println(err)
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
+		if resp.StatusCode != http.StatusOK {
+			fmt.Println(resp.StatusCode)
+		} else {
 			fileName := teachers[i].Id + "-" + teachers[i].Surname + "_" + teachers[i].Firstname + "_" + teachers[i].Patronymic + "_" + ".jpg"
 			file, err := os.Create(fileName)
 			if err != nil {
@@ -205,8 +207,6 @@ func ImageTeachers(client *http.Client, teachers []types.Teacher) {
 			if err != nil {
 				fmt.Println(err)
 			}
-		} else {
-			fmt.Println(resp.StatusCode)
 		}
 	}
 	if err := os.Chdir(currentDir); err != nil {
