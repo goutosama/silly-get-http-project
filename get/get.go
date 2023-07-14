@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	types "get-cafedra.com/m/v2/types"
 )
@@ -144,9 +145,9 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 		var resp *http.Response
 		var err error
 		if isExternalUrl(articles.Articles[i].Preview) {
-			resp, err = client.Get(articles.Articles[i].Preview)
+			resp, err = client.Get(strings.ReplaceAll(articles.Articles[i].Preview, "\\", "/"))
 		} else {
-			resp, err = client.Get(url + articles.Articles[i].Preview)
+			resp, err = client.Get(url + strings.ReplaceAll(articles.Articles[i].Preview, "\\", "/"))
 		}
 		if err != nil {
 			fmt.Println(err)
@@ -189,7 +190,7 @@ func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
 	}
 	var url string = "https://oldit.isuct.ru"
 	for i := 0; i < len(teachers); i++ {
-		resp, err := client.Get(url + teachers[i].Avatar)
+		resp, err := client.Get(url + strings.ReplaceAll(teachers[i].Avatar, "\\", "/"))
 		if err != nil {
 			fmt.Println(err)
 		}
