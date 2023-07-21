@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	get "get-cafedra.com/m/v2/get"
+	"get-cafedra.com/m/v2/get"
 )
 
 func main() {
@@ -20,7 +20,8 @@ func main() {
 	TFull := get.TeachersFull(client, teachers)
 	AFull := get.ArticlesFull(client, articles)
 
-	fmt.Println(DFull[0])
-	fmt.Println(TFull[0])
-	fmt.Println(AFull[0])
+	fmt.Println(DFull[0].Content[0])
+	fmt.Println(TFull[0].Contacts[0])
+	get.ImageArticlesFull(client, AFull)
+
 }

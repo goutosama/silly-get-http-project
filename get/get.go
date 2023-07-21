@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	types "get-cafedra.com/m/v2/types"
+	"github.com/PuerkitoBio/goquery"
 )
 
 func Departament(client *http.Client) []types.DepartDemo {
@@ -92,7 +93,7 @@ func ImageDepartament(client *http.Client, depart []types.DepartDemo) {
 		fmt.Println(err)
 	}
 	folderName := "Departament"
-	if err := os.Mkdir(folderName, os.ModePerm); err != nil {
+	if err := os.MkdirAll(folderName, os.ModePerm); err != nil {
 		fmt.Println(err)
 	}
 	if err := os.Chdir(folderName); err != nil {
@@ -134,7 +135,7 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 		fmt.Println(err)
 	}
 	folderName := "ArticlesPreview"
-	if err := os.Mkdir(folderName, os.ModePerm); err != nil {
+	if err := os.MkdirAll(folderName, os.ModePerm); err != nil {
 		fmt.Println(err)
 	}
 	if err := os.Chdir(folderName); err != nil {
@@ -182,7 +183,7 @@ func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
 		fmt.Println(err)
 	}
 	folderName := "Teachers"
-	if err := os.Mkdir(folderName, os.ModePerm); err != nil {
+	if err := os.MkdirAll(folderName, os.ModePerm); err != nil {
 		fmt.Println(err)
 	}
 	if err := os.Chdir(folderName); err != nil {
@@ -216,11 +217,7 @@ func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
 }
 
 func isExternalUrl(url string) bool {
-	if string(url[0]) == "/" {
-		return false
-	} else {
-		return true
-	}
+	return strings.HasPrefix(url, "http")
 }
 
 func DepartamentFull(client *http.Client, depart []types.DepartDemo) []types.DepartFull {
@@ -305,4 +302,77 @@ func ArticlesFull(client *http.Client, articles types.ArticleResp) []types.Artic
 		}
 	}
 	return result
+}
+
+func ImageArticlesFull(client *http.Client, articles []types.ArticleFull) { //gets images inside Content field
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := os.MkdirAll("Downloaded", os.ModePerm); err != nil {
+		fmt.Println(err)
+	}
+	if err := os.Chdir("Downloaded"); err != nil {
+		fmt.Println(err)
+	}
+	folderName := "ArticlesFull"
+	if err := os.MkdirAll(folderName, os.ModePerm); err != nil {
+		fmt.Println(err)
+	}
+	if err := os.Chdir(folderName); err != nil {
+		fmt.Println(err)
+	}
+	//getting to the ArticlesFull folder
+	var url string = "https://oldit.isuct.ru"
+	for i := 0; i < len(articles); i++ {
+		fmt.Println(articles[i].Id)
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(articles[i].Content))
+		if err != nil {
+			fmt.Println(err)
+		}
+		doc.Find("img").Each(func(c int, s *goquery.Selection) {
+			text, b := s.Attr("src")
+			if b {
+				var resp *http.Response
+
+				resp, err = client.Get(url + strings.Trim(text, "\\\""))
+
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer resp.Body.Close()
+				if resp.StatusCode != http.StatusOK {
+					fmt.Println(fmt.Sprint(resp.StatusCode) + " " + articles[i].Id)
+				} else {
+					currentDir, err := os.Getwd()
+					if err != nil {
+						fmt.Println(err)
+					}
+					folder := articles[i].Id
+					if err := os.MkdirAll(folder, os.ModePerm); err != nil {
+						fmt.Println(err)
+					}
+					if err := os.Chdir(folder); err != nil {
+						fmt.Println(err)
+					}
+					fileName := fmt.Sprint(c) + ".jpg"
+					file, err := os.Create(fileName)
+					if err != nil {
+						fmt.Println(err)
+					}
+					defer file.Close()
+					_, err = io.Copy(file, resp.Body)
+					if err != nil {
+						fmt.Println(err)
+					}
+					if err := os.Chdir(currentDir); err != nil {
+						fmt.Println(err)
+					}
+				}
+			}
+		})
+	}
+	if err := os.Chdir(currentDir); err != nil {
+		fmt.Println(err)
+	}
 }
