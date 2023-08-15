@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -77,11 +76,7 @@ func GetHueten(client *http.Client, token string) {
 	fmt.Println(string(bodyBytes))
 }
 
-func SendFile(urlPath, filePath, token string, refId int, ref, field string) error {
-	client := &http.Client{
-		Timeout: time.Second * 10,
-	}
-
+func SendFile(client *http.Client, urlPath, filePath, token string, refId int, ref, field string) error {
 	// New multipart writer.
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -128,7 +123,7 @@ func SendFile(urlPath, filePath, token string, refId int, ref, field string) err
 		return err
 	}
 	req.Header.Add("Authorization", "bearer "+token)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Content-Type", writer.FormDataContentType())
 	rsp, _ := client.Do(req)
 	if rsp.StatusCode != http.StatusOK {
 		text, err := io.ReadAll(rsp.Body)
