@@ -2,26 +2,32 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"os"
 
-	"get-cafedra.com/m/v2/get"
+	"get-cafedra.com/m/v2/post"
 )
 
 func main() {
-	client := &http.Client{}
-	depart := get.Departament(client)
-	get.ImageDepartament(client, depart)
-	teachers := get.Teachers(client)
-	get.ImageTeachers(client, teachers)
-	articles := get.Articles(client)
-	get.ImageArticles(client, articles)
+	//client := &http.Client{}
+	//depart := get.Departament(client)
+	//get.ImageDepartament(client, depart)
+	//teachers := get.Teachers(client)
+	//get.ImageTeachers(client, teachers)
+	//articles := get.Articles(client)
+	//get.ImageArticles(client, articles)
 
-	DFull := get.DepartamentFull(client, depart)
-	TFull := get.TeachersFull(client, teachers)
-	AFull := get.ArticlesFull(client, articles)
+	//DFull := get.DepartamentFull(client, depart)
+	//TFull := get.TeachersFull(client, teachers)
+	//AFull := get.ArticlesFull(client, articles)
 
-	fmt.Println(DFull[0].Content[0])
-	fmt.Println(TFull[0].Contacts[0])
-	get.ImageArticlesFull(client, AFull)
+	//fmt.Println(DFull[0].Content[0])
+	//fmt.Println(TFull[0].Contacts[0])
+	//get.ImageArticlesFull(client, AFull)
 
+	//post.TestPost(client)
+	err := post.SendFile("http://localhost:1337/api/upload/", "Downloaded/ArticlesPreview/60b21f5436fa3600a75a4d53.jpg", os.Getenv("STRAPI_TOKEN2"), 5, "departament", "preview")
+	if err != nil {
+		fmt.Print("post.SendFile: ")
+		fmt.Println(err)
+	}
 }
