@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,8 +17,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func PostJson(client *http.Client, token string, jsonBody []byte) types.Response {
-	url := "http://localhost:1337" //is subject to change
+func PostJson(web types.WebData, jsonBody []byte) types.Response {
+	client := web.Client
+	token := web.Token
+	url := web.Url //is subject to change
 	path := "/api/departaments"
 	req, err := http.NewRequest(http.MethodPost, url+path, bytes.NewReader(jsonBody))
 	if err != nil {
@@ -48,7 +51,7 @@ func PostJson(client *http.Client, token string, jsonBody []byte) types.Response
 	return responseBody
 }
 
-func TestPost(client *http.Client) types.Response {
+func TestPost(web types.WebData) types.Response {
 	if err := godotenv.Load(".env"); err != nil {
 		fmt.Print("post.TestPost: ")
 		fmt.Println(err)
@@ -62,11 +65,13 @@ func TestPost(client *http.Client) types.Response {
 								  }
 		}
 	`
-	return PostJson(client, os.Getenv("STRAPI_TOKEN2"), []byte(testJson))
+	return PostJson(web, []byte(testJson))
 }
 
-func GetHueten(client *http.Client, token string) {
-	url := "http://localhost:1337" //is subject to change
+func GetHueten(web types.WebData) {
+	client := web.Client
+	token := web.Token
+	url := web.Url //is subject to change
 	path := "/api/test-huetens/1"
 	req, err := http.NewRequest(http.MethodGet, url+path, nil)
 	if err != nil {
@@ -86,11 +91,21 @@ func GetHueten(client *http.Client, token string) {
 	fmt.Println(string(bodyBytes))
 }
 
-func SendFile(client *http.Client, urlPath, filePath, token string, refId int, ref, field string) error {
+func SendFile(web types.WebData, filePath string, refId int, ref, field string) error {
+	path := "/api/upload/"
+	client := web.Client
+	token := web.Token
 	// New multipart writer.
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	fw, err := writer.CreateFormFile("files", filePath)
+	//fw, err := writer.CreateFormFile("files", filePath) // old method (it doesn't change Content-Type header for this field)
+
+	partHeader := textproto.MIMEHeader{}
+	partHeader.Add("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "files", filepath.Base(filePath)))
+	partHeader.Add("Content-Type", types.GetContentType(filePath))
+	fw, err := writer.CreatePart(partHeader)
+
 	if err != nil {
 		return err
 	}
@@ -132,7 +147,7 @@ func SendFile(client *http.Client, urlPath, filePath, token string, refId int, r
 	}
 	writer.Close()
 
-	req, err := http.NewRequest(http.MethodPost, urlPath, bytes.NewReader(body.Bytes()))
+	req, err := http.NewRequest(http.MethodPost, web.Url+path, bytes.NewReader(body.Bytes()))
 	if err != nil {
 		return err
 	}

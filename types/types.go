@@ -1,6 +1,8 @@
 package types
 
 import (
+	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -81,4 +83,40 @@ type Response struct {
 type Data struct {
 	Id         int
 	Attributes map[string]string
+}
+
+func GetContentType(filePath string) string {
+	ext := filepath.Ext(filePath)
+	var res string
+	if ext == ".jpg" || ext == ".jpeg" || ext == ".jpe" || ext == ".jfif" {
+		res = "jpeg"
+	} else {
+		switch ext {
+		case ".gif":
+			res = "gif"
+		case ".png":
+			res = "png"
+		case ".tiff":
+			res = "tiff"
+		case ".svg":
+			res = "svg+xml"
+		case ".svgz":
+			res = "svg+xml"
+		case ".ico":
+			res = "vnd.microsoft.icon"
+		case ".wbmp":
+			res = "vnd.wap.wbmp"
+		case ".webp":
+			res = "webp"
+		}
+	}
+
+	return "image/" + res
+}
+
+type WebData struct {
+	Client *http.Client
+	UrlOld string
+	Url    string
+	Token  string
 }

@@ -12,8 +12,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func Departament(client *http.Client) []types.DepartDemo {
-	resp, err := client.Get("https://oldit.isuct.ru/api/departament")
+func Departament(web types.WebData) []types.DepartDemo {
+	client := web.Client
+	path := "/api/departament"
+	resp, err := client.Get(web.UrlOld + path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -36,8 +38,10 @@ func Departament(client *http.Client) []types.DepartDemo {
 	}
 }
 
-func Articles(client *http.Client) types.ArticleResp {
-	resp, err := client.Get("https://oldit.isuct.ru/api/article?limit=0&offset=0&orderBy=0")
+func Articles(web types.WebData) types.ArticleResp {
+	client := web.Client
+	path := "/api/article?limit=0&offset=0&orderBy=0"
+	resp, err := client.Get(web.UrlOld + path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -60,8 +64,10 @@ func Articles(client *http.Client) types.ArticleResp {
 	}
 }
 
-func Teachers(client *http.Client) []types.TeacherDemo {
-	resp, err := client.Get("https://oldit.isuct.ru/api/teacher")
+func Teachers(web types.WebData) []types.TeacherDemo {
+	client := web.Client
+	path := "/api/teacher"
+	resp, err := client.Get(web.UrlOld + path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -84,7 +90,7 @@ func Teachers(client *http.Client) []types.TeacherDemo {
 	}
 }
 
-func ImageDepartament(client *http.Client, depart []types.DepartDemo) {
+func ImageDepartament(web types.WebData, depart []types.DepartDemo) {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -99,7 +105,8 @@ func ImageDepartament(client *http.Client, depart []types.DepartDemo) {
 	if err := os.Chdir(folderName); err != nil {
 		fmt.Println(err)
 	}
-	var url string = "https://oldit.isuct.ru"
+	client := web.Client
+	var url string = web.UrlOld
 	for i := 0; i < len(depart); i++ {
 		resp, err := client.Get(url + depart[i].Preview)
 		if err != nil {
@@ -126,7 +133,7 @@ func ImageDepartament(client *http.Client, depart []types.DepartDemo) {
 	}
 }
 
-func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs rework for articles as whole
+func ImageArticles(web types.WebData, articles types.ArticleResp) { //needs rework for articles as whole
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -141,7 +148,8 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 	if err := os.Chdir(folderName); err != nil {
 		fmt.Println(err)
 	}
-	var url string = "https://oldit.isuct.ru"
+	client := web.Client
+	var url string = web.UrlOld
 	for i := 0; i < articles.Total; i++ {
 		var resp *http.Response
 		var err error
@@ -174,7 +182,7 @@ func ImageArticles(client *http.Client, articles types.ArticleResp) { //needs re
 	}
 }
 
-func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
+func ImageTeachers(web types.WebData, teachers []types.TeacherDemo) {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -189,7 +197,8 @@ func ImageTeachers(client *http.Client, teachers []types.TeacherDemo) {
 	if err := os.Chdir(folderName); err != nil {
 		fmt.Println(err)
 	}
-	var url string = "https://oldit.isuct.ru"
+	client := web.Client
+	var url string = web.UrlOld
 	for i := 0; i < len(teachers); i++ {
 		resp, err := client.Get(url + strings.ReplaceAll(teachers[i].Avatar, "\\", "/"))
 		if err != nil {
@@ -220,8 +229,9 @@ func isExternalUrl(url string) bool {
 	return strings.HasPrefix(url, "http")
 }
 
-func DepartamentFull(client *http.Client, depart []types.DepartDemo) []types.DepartFull {
-	var url string = "https://oldit.isuct.ru"
+func DepartamentFull(web types.WebData, depart []types.DepartDemo) []types.DepartFull {
+	client := web.Client
+	var url string = web.UrlOld
 	var path string = "/api/departament/"
 	var result []types.DepartFull
 	for i := 0; i < len(depart); i++ {
@@ -248,8 +258,9 @@ func DepartamentFull(client *http.Client, depart []types.DepartDemo) []types.Dep
 	return result
 }
 
-func TeachersFull(client *http.Client, teacher []types.TeacherDemo) []types.TeacherFull {
-	var url string = "https://oldit.isuct.ru"
+func TeachersFull(web types.WebData, teacher []types.TeacherDemo) []types.TeacherFull {
+	client := web.Client
+	var url string = web.UrlOld
 	var path string = "/api/teacher/"
 	var result []types.TeacherFull
 	for i := 0; i < len(teacher); i++ {
@@ -276,8 +287,9 @@ func TeachersFull(client *http.Client, teacher []types.TeacherDemo) []types.Teac
 	return result
 }
 
-func ArticlesFull(client *http.Client, articles types.ArticleResp) []types.ArticleFull {
-	var url string = "https://oldit.isuct.ru"
+func ArticlesFull(web types.WebData, articles types.ArticleResp) []types.ArticleFull {
+	client := web.Client
+	var url string = web.UrlOld
 	var path string = "/api/article/"
 	var result []types.ArticleFull
 	for i := 0; i < articles.Total; i++ {
@@ -304,7 +316,7 @@ func ArticlesFull(client *http.Client, articles types.ArticleResp) []types.Artic
 	return result
 }
 
-func ImageArticlesFull(client *http.Client, articles []types.ArticleFull) { //gets images inside Content field
+func ImageArticlesFull(web types.WebData, articles []types.ArticleFull) { //gets images inside Content field
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -323,7 +335,8 @@ func ImageArticlesFull(client *http.Client, articles []types.ArticleFull) { //ge
 		fmt.Println(err)
 	}
 	//getting to the ArticlesFull folder
-	var url string = "https://oldit.isuct.ru"
+	client := web.Client
+	var url string = web.UrlOld
 	for i := 0; i < len(articles); i++ {
 		fmt.Println(articles[i].Id)
 		doc, err := goquery.NewDocumentFromReader(strings.NewReader(articles[i].Content))
