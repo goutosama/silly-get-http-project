@@ -2,18 +2,21 @@ package post
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"get-cafedra.com/m/v2/types"
 	"github.com/joho/godotenv"
 )
 
-func PostJson(client *http.Client, token string, jsonBody []byte) {
+func PostJson(client *http.Client, token string, jsonBody []byte) types.Response {
 	url := "http://localhost:1337" //is subject to change
 	path := "/api/departaments"
 	req, err := http.NewRequest(http.MethodPost, url+path, bytes.NewReader(jsonBody))
@@ -35,10 +38,17 @@ func PostJson(client *http.Client, token string, jsonBody []byte) {
 		fmt.Print("post.PostJson: ")
 		fmt.Println(err)
 	}
+	var responseBody types.Response
+	err = json.Unmarshal(text, &responseBody)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(res.Status + string(text))
+	defer res.Body.Close()
+	return responseBody
 }
 
-func TestPost(client *http.Client) {
+func TestPost(client *http.Client) types.Response {
 	if err := godotenv.Load(".env"); err != nil {
 		fmt.Print("post.TestPost: ")
 		fmt.Println(err)
@@ -52,7 +62,7 @@ func TestPost(client *http.Client) {
 								  }
 		}
 	`
-	PostJson(client, os.Getenv("STRAPI_TOKEN2"), []byte(testJson))
+	return PostJson(client, os.Getenv("STRAPI_TOKEN2"), []byte(testJson))
 }
 
 func GetHueten(client *http.Client, token string) {
@@ -84,7 +94,11 @@ func SendFile(client *http.Client, urlPath, filePath, token string, refId int, r
 	if err != nil {
 		return err
 	}
-	file, err := os.Open(filePath)
+	err = os.Chdir(filepath.Dir(filePath))
+	if err != nil {
+		return err
+	}
+	file, err := os.Open(filepath.Base(filePath))
 	if err != nil {
 		return err
 	}
@@ -125,6 +139,13 @@ func SendFile(client *http.Client, urlPath, filePath, token string, refId int, r
 	req.Header.Add("Authorization", "bearer "+token)
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 	rsp, _ := client.Do(req)
+
+	// respDump, err := httputil.DumpResponse(rsp, true)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	//fmt.Printf("RESPONSE:\n%s", string(respDump))
 	if rsp.StatusCode != http.StatusOK {
 		text, err := io.ReadAll(rsp.Body)
 		if err != nil {
@@ -132,7 +153,7 @@ func SendFile(client *http.Client, urlPath, filePath, token string, refId int, r
 			fmt.Println(err)
 		}
 		fmt.Println(string(text))
-		return errors.New("Request failed with response code:" + fmt.Sprint(rsp.StatusCode))
+		return errors.New("Request failed with response code: " + fmt.Sprint(rsp.StatusCode))
 	} else {
 		return nil
 	}

@@ -73,3 +73,12 @@ type TeacherFull struct {
 	Contacts    string
 	IsVisible   bool
 }
+
+type Response struct {
+	Data Data
+}
+
+type Data struct {
+	Id         int
+	Attributes map[string]string
+}
