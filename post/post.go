@@ -46,7 +46,7 @@ func PostJson(web types.WebData, jsonBody []byte) types.Response {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(res.Status + string(text))
+	fmt.Println(res.Status)
 	defer res.Body.Close()
 	return responseBody
 }
@@ -58,7 +58,7 @@ func TestPost(web types.WebData) types.Response {
 	}
 	testJson := `
 	{
-		"data": {
+		"Data": {
 					"Title": "Hello",
 					
 					"Content":"lmao"
@@ -91,7 +91,7 @@ func GetHueten(web types.WebData) {
 	fmt.Println(string(bodyBytes))
 }
 
-func SendFile(web types.WebData, filePath string, refId int, ref, field string) error {
+func SendPreview(web types.WebData, filePath string, refId int, ref, field string) error {
 	path := "/api/upload/"
 	client := web.Client
 	token := web.Token
@@ -171,5 +171,111 @@ func SendFile(web types.WebData, filePath string, refId int, ref, field string) 
 		return errors.New("Request failed with response code: " + fmt.Sprint(rsp.StatusCode))
 	} else {
 		return nil
+	}
+}
+
+func SendMedia(web types.WebData, folderPath string, refId int, ref, field string) ([]types.ResponseMulti, error) {
+	path := "/api/upload/"
+	client := web.Client
+	token := web.Token
+	// New multipart writer.
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	fs, err := os.ReadDir(folderPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = os.Chdir(folderPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	dir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	var fw io.Writer
+	for i := 0; i < len(fs); i++ {
+		partHeader := textproto.MIMEHeader{}
+		partHeader.Add("Content-Disposition",
+			fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "files", filepath.Base(folderPath)+"_"+fs[i].Name()))
+		partHeader.Add("Content-Type", types.GetContentType(folderPath))
+		fw, err = writer.CreatePart(partHeader)
+
+		if err != nil {
+			return nil, err
+		}
+		file, err := os.Open(dir + `\` + fs[i].Name())
+		if err != nil {
+			return nil, err
+		}
+		_, err = io.Copy(fw, file)
+		if err != nil {
+			return nil, err
+		}
+	}
+	fw, err = writer.CreateFormField("refId")
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(fw, strings.NewReader(fmt.Sprint(refId)))
+	if err != nil {
+		return nil, err
+	}
+	fw, err = writer.CreateFormField("ref")
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(fw, strings.NewReader(fmt.Sprint(ref)))
+	if err != nil {
+		return nil, err
+	}
+	fw, err = writer.CreateFormField("field")
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(fw, strings.NewReader(fmt.Sprint(field)))
+	if err != nil {
+		return nil, err
+	}
+	writer.Close()
+
+	req, err := http.NewRequest(http.MethodPost, web.Url+path, bytes.NewReader(body.Bytes()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "bearer "+token)
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+	rsp, _ := client.Do(req)
+
+	// respDump, err := httputil.DumpResponse(rsp, true)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	//fmt.Printf("RESPONSE:\n%s", string(respDump))
+	text, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		fmt.Print("post.SendMedia: ")
+		fmt.Println(err)
+	}
+	var responseBody []types.ResponseMulti
+	err = json.Unmarshal(text, &responseBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(rsp.Status)
+	defer rsp.Body.Close()
+
+	if rsp.StatusCode != http.StatusOK {
+		text, err := io.ReadAll(rsp.Body)
+		if err != nil {
+			fmt.Print("post.SendFile: ")
+			fmt.Println(err)
+		}
+		fmt.Println(string(text))
+		return responseBody, errors.New("Request failed with response code: " + fmt.Sprint(rsp.StatusCode))
+	} else {
+		return responseBody, nil
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	types "get-cafedra.com/m/v2/types"
@@ -125,6 +126,73 @@ func ImageDepartament(web types.WebData, depart []types.DepartDemo) {
 			_, err = io.Copy(file, resp.Body)
 			if err != nil {
 				fmt.Println(err)
+			}
+		}
+	}
+	if err := os.Chdir(currentDir); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func ImageDepartamentFull(web types.WebData, depart []types.DepartFull) { //gets images inside Content field
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := os.MkdirAll("Downloaded", os.ModePerm); err != nil {
+		fmt.Println(err)
+	}
+	if err := os.Chdir("Downloaded"); err != nil {
+		fmt.Println(err)
+	}
+	folderName := "DepartFull"
+	if err := os.MkdirAll(folderName, os.ModePerm); err != nil {
+		fmt.Println(err)
+	}
+	if err := os.Chdir(folderName); err != nil {
+		fmt.Println(err)
+	}
+	//getting to the ArticlesFull folder
+	client := web.Client
+	var url string = web.UrlOld
+	for i := 0; i < len(depart); i++ {
+		fmt.Println(depart[i].Id)
+		for j := 0; j < len(depart[i].Media); j++ {
+			var resp *http.Response
+
+			resp, err = client.Get(url + strings.Trim(depart[i].Media[j], "\\\""))
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				fmt.Println(fmt.Sprint(resp.StatusCode) + " " + depart[i].Id)
+			} else {
+				currentDir, err := os.Getwd()
+				if err != nil {
+					fmt.Println(err)
+				}
+				folder := depart[i].Id
+				if err := os.MkdirAll(folder, os.ModePerm); err != nil {
+					fmt.Println(err)
+				}
+				if err := os.Chdir(folder); err != nil {
+					fmt.Println(err)
+				}
+				fileName := filepath.Base(depart[i].Media[j])
+				file, err := os.Create(fileName)
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer file.Close()
+				_, err = io.Copy(file, resp.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if err := os.Chdir(currentDir); err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}

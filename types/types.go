@@ -85,6 +85,33 @@ type Data struct {
 	Attributes map[string]string
 }
 
+type Request struct {
+	Data interface{}
+}
+
+type ResponseMulti struct {
+	Id              int
+	Name            string
+	AlternativeText string
+	Caption         string
+	Width           int
+	Height          int
+
+	Hash              string
+	Ext               string
+	Mime              string
+	Size              float64
+	Url               string
+	ReviewUrl         string
+	Provider          string
+	Provider_metadata string //?
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+type DataMulti struct {
+	Data string
+}
+
 func GetContentType(filePath string) string {
 	ext := filepath.Ext(filePath)
 	var res string
@@ -119,4 +146,11 @@ type WebData struct {
 	UrlOld string
 	Url    string
 	Token  string
+}
+
+type DepartNoFiles struct {
+	IsVisible bool
+	Id        string
+	Title     string
+	Content   string
 }
