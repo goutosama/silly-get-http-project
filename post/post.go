@@ -97,6 +97,10 @@ func SendPreview(web types.WebData, filePath string, refId int, ref, field strin
 	token := web.Token
 	// New multipart writer.
 	body := &bytes.Buffer{}
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
 	writer := multipart.NewWriter(body)
 	//fw, err := writer.CreateFormFile("files", filePath) // old method (it doesn't change Content-Type header for this field)
 
@@ -146,6 +150,9 @@ func SendPreview(web types.WebData, filePath string, refId int, ref, field strin
 		return err
 	}
 	writer.Close()
+	if err := os.Chdir(currentDir); err != nil {
+		fmt.Println(err)
+	}
 
 	req, err := http.NewRequest(http.MethodPost, web.Url+path, bytes.NewReader(body.Bytes()))
 	if err != nil {
@@ -182,6 +189,10 @@ func SendMedia(web types.WebData, folderPath string, refId int, ref, field strin
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
 	fs, err := os.ReadDir(folderPath)
 	if err != nil {
 		fmt.Println(err)
@@ -239,6 +250,9 @@ func SendMedia(web types.WebData, folderPath string, refId int, ref, field strin
 		return nil, err
 	}
 	writer.Close()
+	if err := os.Chdir(currentDir); err != nil {
+		fmt.Println(err)
+	}
 
 	req, err := http.NewRequest(http.MethodPost, web.Url+path, bytes.NewReader(body.Bytes()))
 	if err != nil {

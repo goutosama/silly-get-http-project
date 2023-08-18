@@ -3,6 +3,7 @@ package transfer
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"get-cafedra.com/m/v2/get"
@@ -66,9 +67,12 @@ func Departaments(web types.WebData) {
 			fmt.Print("post.SendPreview: ")
 			fmt.Println(err)
 		}
-		_, err = post.SendMedia(web, `Downloaded/DepartFull/`+depart[i].Id, resp.Data.Id, "api::departament.departament", "media")
-		if err != nil {
-			fmt.Println(err)
+		fmt.Println(os.Getwd())
+		if len(DFull[i].Media) != 0 {
+			_, err = post.SendMedia(web, `Downloaded/DepartFull/`+depart[i].Id, resp.Data.Id, "api::departament.departament", "media")
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }

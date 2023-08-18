@@ -24,6 +24,9 @@ func main() {
 		Url:    os.Getenv("URL"),
 		Token:  os.Getenv("STRAPI_TOKEN2"),
 	}
+
+	// fs, _ := os.ReadDir("Downloaded/DepartFull/604fc0fdcc947066d8c0592b")
+	// fmt.Println(fs[0].Name())
 	transfer.Departaments(Web)
 	// depart := get.Departament(Web)
 	// DFull := get.DepartamentFull(Web, depart)
