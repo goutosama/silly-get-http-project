@@ -154,3 +154,18 @@ type DepartNoFiles struct {
 	Title     string
 	Content   string
 }
+
+type TeacherNoFiles struct {
+	Surname     string
+	Firstname   string
+	Patronymic  string
+	Position    string
+	Education   string
+	Courses     string
+	Teaching    string
+	Research    string
+	Achivements string
+	Info        string
+	Contacts    string
+	IsVisible   bool
+}

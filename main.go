@@ -25,14 +25,7 @@ func main() {
 		Token:  os.Getenv("STRAPI_TOKEN2"),
 	}
 
-	// fs, _ := os.ReadDir("Downloaded/DepartFull/604fc0fdcc947066d8c0592b")
-	// fmt.Println(fs[0].Name())
-	transfer.Departaments(Web)
-	// depart := get.Departament(Web)
-	// DFull := get.DepartamentFull(Web, depart)
-	// get.ImageDepartamentFull(Web, DFull)
-	//teachers := get.Teachers(client)
-	//get.ImageTeachers(client, teachers)
+	transfer.Teachers(Web)
 	//articles := get.Articles(client)
 	//get.ImageArticles(client, articles)
 
