@@ -17,11 +17,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func PostJson(web types.WebData, jsonBody []byte) types.Response {
+func PostJson(web types.WebData, jsonBody []byte, api string) types.Response {
 	client := web.Client
 	token := web.Token
 	url := web.Url //is subject to change
-	path := "/api/departaments"
+	path := "/api/" + api + "s/"
 	req, err := http.NewRequest(http.MethodPost, url+path, bytes.NewReader(jsonBody))
 	if err != nil {
 		fmt.Print("post.PostJson: ")
@@ -65,7 +65,7 @@ func TestPost(web types.WebData) types.Response {
 								  }
 		}
 	`
-	return PostJson(web, []byte(testJson))
+	return PostJson(web, []byte(testJson), "departament")
 }
 
 func GetHueten(web types.WebData) {
@@ -292,4 +292,38 @@ func SendMedia(web types.WebData, folderPath string, refId int, ref, field strin
 	} else {
 		return responseBody, nil
 	}
+}
+
+func UpdateArticleContent(web types.WebData, jsonBody []byte, api string, Id int) {
+	client := web.Client
+	token := web.Token
+	url := web.Url //is subject to change
+	path := "/api/" + api + "s/"
+	req, err := http.NewRequest(http.MethodPut, url+path+fmt.Sprint(Id), bytes.NewReader(jsonBody))
+	if err != nil {
+		fmt.Print("post.UpdateArticleContent: ")
+		fmt.Println(err)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "bearer "+token)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Print("post.UpdateArticleContent: ")
+		fmt.Println(err)
+	}
+	fmt.Print("post.UpdateArticleContent: ")
+	text, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Print("post.UpdateArticleContent: ")
+		fmt.Println(err)
+	}
+	var responseBody types.Response
+	err = json.Unmarshal(text, &responseBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res.Status)
+	defer res.Body.Close()
+
 }

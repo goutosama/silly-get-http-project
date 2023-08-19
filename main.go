@@ -24,17 +24,9 @@ func main() {
 		Url:    os.Getenv("URL"),
 		Token:  os.Getenv("STRAPI_TOKEN2"),
 	}
-
-	transfer.Teachers(Web)
-	//articles := get.Articles(client)
-	//get.ImageArticles(client, articles)
-
-	//TFull := get.TeachersFull(client, teachers)
-	//AFull := get.ArticlesFull(client, articles)
-
-	//fmt.Println(DFull[0].Content[0])
-	//fmt.Println(TFull[0].Contacts[0])
-	//get.ImageArticlesFull(client, AFull)
+	//transfer.Departaments(Web)
+	//transfer.Teachers(Web)
+	transfer.Articles(Web)
 
 	//resp :=	post.TestPost(Web)
 	// // post.GetHueten(Web)
