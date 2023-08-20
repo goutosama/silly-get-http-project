@@ -28,6 +28,8 @@ func main() {
 	//transfer.Teachers(Web)
 	transfer.Articles(Web)
 
+	//post.TestPost(Web)
+
 	//resp :=	post.TestPost(Web)
 	// // post.GetHueten(Web)
 

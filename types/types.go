@@ -172,14 +172,18 @@ type TeacherNoFiles struct {
 
 type ArticleNoFiles struct {
 	IsVisible bool
-	CreatedAt time.Time //response uses RFC 3339 or ISO-8601
-	Id        string
-	Title     string
-	Category  string
+	//CreatedAt time.Time //response uses RFC 3339 or ISO-8601
+	//Id        string
+	Title    string
+	Category string
 
 	Content     string
 	Description string //is always empty?
 	Author      string
 	IsPublished bool
-	UpdatedAt   time.Time
+	//UpdatedAt   time.Time
+}
+
+type ArticleContent struct {
+	Content string
 }

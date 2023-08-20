@@ -140,13 +140,13 @@ func Articles(web types.WebData) {
 			Data: articleNoFile,
 		}
 		jsonBody, err := json.Marshal(request)
-		fmt.Println(string(jsonBody))
 		jsonBody[2] = byte('d')
 		if err != nil {
 			fmt.Println(err)
 		}
-		//fmt.Println(string(jsonBody))
-		resp := post.PostJson(web, jsonBody, "article")
+		str := string(jsonBody)
+		fmt.Println(str)
+		resp := post.PostJson(web, []byte(str), "article")
 		err = post.SendPreview(web, `Downloaded/ArticlesPreview/`+AFull[i].Id+".jpg", resp.Data.Id, "api::article.article", "preview")
 		if err != nil {
 			fmt.Print("post.SendPreview: ")
@@ -158,11 +158,11 @@ func Articles(web types.WebData) {
 			fmt.Println(err)
 		}
 		AFull[i].Content = HtmlToMarkdown(AFull[i].Content, MediaResponse)
-		articleContent := types.ArticleNoFiles{
+		articlePut := types.ArticleContent{
 			Content: AFull[i].Content,
 		}
 		var requestPut types.Request = types.Request{
-			Data: articleContent,
+			Data: articlePut,
 		}
 		jsonBody, err = json.Marshal(requestPut)
 		jsonBody[2] = byte('d')
