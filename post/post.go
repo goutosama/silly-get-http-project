@@ -113,6 +113,9 @@ func SendPreview(web types.WebData, filePath string, refId int, ref, field strin
 	}
 	file, err := os.Open(filepath.Base(filePath))
 	if err != nil {
+		if err := os.Chdir(currentDir); err != nil {
+			fmt.Println(err)
+		}
 		return err
 	}
 	_, err = io.Copy(fw, file)
@@ -143,11 +146,10 @@ func SendPreview(web types.WebData, filePath string, refId int, ref, field strin
 	if err != nil {
 		return err
 	}
-	writer.Close()
 	if err := os.Chdir(currentDir); err != nil {
 		fmt.Println(err)
 	}
-
+	writer.Close()
 	req, err := http.NewRequest(http.MethodPost, web.Url+path, bytes.NewReader(body.Bytes()))
 	if err != nil {
 		return err
@@ -155,7 +157,6 @@ func SendPreview(web types.WebData, filePath string, refId int, ref, field strin
 	req.Header.Add("Authorization", "bearer "+token)
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 	rsp, _ := client.Do(req)
-
 	// respDump, err := httputil.DumpResponse(rsp, true)
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -254,7 +255,10 @@ func SendMedia(web types.WebData, folderPath string, refId int, ref, field strin
 	}
 	req.Header.Add("Authorization", "bearer "+token)
 	req.Header.Add("Content-Type", writer.FormDataContentType())
-	rsp, _ := client.Do(req)
+	rsp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
 	// respDump, err := httputil.DumpResponse(rsp, true)
 	// if err != nil {
@@ -274,7 +278,6 @@ func SendMedia(web types.WebData, folderPath string, refId int, ref, field strin
 	}
 	fmt.Println(rsp.Status)
 	defer rsp.Body.Close()
-
 	if rsp.StatusCode != http.StatusOK {
 		text, err := io.ReadAll(rsp.Body)
 		if err != nil {

@@ -127,12 +127,13 @@ func Articles(web types.WebData) {
 	//get.ImageArticlesFull(web, AFull) //too much downloads for testing purposes
 
 	for i := 0; i < len(AFull); i++ {
-		AFull[i].Content = HtmlToMarkdown(AFull[i].Content, nil)
+		fmt.Println("Sending article " + fmt.Sprint(i) + " with Id: " + AFull[i].Id)
+		Content := HtmlToMarkdown(AFull[i].Content, nil)
 		articleNoFile := types.ArticleNoFiles{
 			IsVisible:   AFull[i].IsVisible,
 			Title:       AFull[i].Title,
 			Category:    AFull[i].Category,
-			Content:     AFull[i].Content,
+			Content:     Content,
 			Description: AFull[i].Description,
 			Author:      AFull[i].Author,
 		}
@@ -142,20 +143,25 @@ func Articles(web types.WebData) {
 		jsonBody, err := json.Marshal(request)
 		jsonBody[2] = byte('d')
 		if err != nil {
+			fmt.Print(AFull[i].Id + " ")
+			fmt.Print("json.Marshall: ")
 			fmt.Println(err)
 		}
-		str := string(jsonBody)
-		fmt.Println(str)
-		resp := post.PostJson(web, []byte(str), "article")
+		//fmt.Println(string(jsonBody))
+		resp := post.PostJson(web, jsonBody, "article")
 		err = post.SendPreview(web, `Downloaded/ArticlesPreview/`+AFull[i].Id+".jpg", resp.Data.Id, "api::article.article", "preview")
 		if err != nil {
+			fmt.Print(AFull[i].Id + " ")
 			fmt.Print("post.SendPreview: ")
 			fmt.Println(err)
 		}
 
 		MediaResponse, err := post.SendMedia(web, `Downloaded/ArticlesFull/`+AFull[i].Id, resp.Data.Id, "api::article.article", "media")
 		if err != nil {
+			fmt.Print(AFull[i].Id + " ")
+			fmt.Print("post.SendMedia: ")
 			fmt.Println(err)
+			panic(nil)
 		}
 		AFull[i].Content = HtmlToMarkdown(AFull[i].Content, MediaResponse)
 		articlePut := types.ArticleContent{
@@ -167,6 +173,8 @@ func Articles(web types.WebData) {
 		jsonBody, err = json.Marshal(requestPut)
 		jsonBody[2] = byte('d')
 		if err != nil {
+			fmt.Print(AFull[i].Id + " ")
+			fmt.Print("json.Marshall: ")
 			fmt.Println(err)
 		}
 		post.UpdateArticleContent(web, jsonBody, "article", resp.Data.Id)
