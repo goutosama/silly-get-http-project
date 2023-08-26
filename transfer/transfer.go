@@ -122,9 +122,9 @@ func Teachers(web types.WebData) {
 
 func Articles(web types.WebData) {
 	articles := get.Articles(web)
-	//get.ImageArticles(web, articles)
+	get.ImageArticles(web, articles)
 	AFull := get.ArticlesFull(web, articles)
-	//get.ImageArticlesFull(web, AFull) //too much downloads for testing purposes
+	get.ImageArticlesFull(web, AFull) //too much downloads for testing purposes
 
 	for i := 0; i < len(AFull); i++ {
 		fmt.Println("Sending article " + fmt.Sprint(i) + " with Id: " + AFull[i].Id)
